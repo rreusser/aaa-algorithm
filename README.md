@@ -15,7 +15,7 @@ Not (yet?) published to npm
 ## TO DO
 
 - [x] compute rational approximation
-- [ ] evaluate approximation
+- [x] evaluate approximation
 - [ ] compute poles, zeros, residues
 - [ ] clean up Froissart doublets
 
@@ -25,12 +25,12 @@ Not (yet?) published to npm
 import AAA from "./aaa.js";
 await AAA.ready();
 
-const { VectorC, aaa } = AAA;
+const { VectorComplex, aaa } = AAA;
 const { PI, sin, cos, sinh, cosh, exp } = Math;
 
 const N = 1000;
-const z = new VectorC(N);
-const f = new VectorC(N);
+const z = new VectorComplex(N);
+const f = new VectorComplex(N);
 
 for (let i = 0; i < N; i++) {
   // Z = exp(linspace(-.5, .5+15i*pi, 1000));
@@ -45,16 +45,36 @@ for (let i = 0; i < N; i++) {
   ]);
 }
 
-const result = aaa(z, f, 1e-13, 100);
+// Compute the AAA approximation
+const approx = aaa(z, f, 1e-13, 100);
 
-for (let i = 0; i < result.z.length; i++) {
-  const [zr, zi] = result.z.get(i);
-  console.log(`z[${i}] = ${zr} + ${zi}i`);
+// Evaluate the result at some points
+const zEval = VectorComplex.fromArray([
+  [-0.5, 0],
+  [0, 0],
+  [0.5, 0],
+]);
+const fEval = AAA.eval(zEval, approx);
+for (let i = 0; i < zEval.length; i++) {
+  const z = zEval.get(i);
+  const f = fEval.get(i);
+  console.log(`f(${z[0]} + ${z[1]}i) = ${f[0]} + ${f[1]}i`);
 }
 
+// Clean up
 z.delete();
 f.delete();
-result.delete();
+approx.delete();
+fEval.delete();
+zEval.delete();
+```
+
+Upon running, this prints the approximated values of `tan(π/2 z)`:
+
+```
+f(-0.5 + 0i) = -0.999999999999995 + 1.888073305146161e-15i
+f(0 + 0i) = 8.654269559363806e-16 + 2.4482177643400466e-15i
+f(0.5 + 0i) = 1.0000000000000009 + 2.4281095898961374e-15i
 ```
 
 ## Development

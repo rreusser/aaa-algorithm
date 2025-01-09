@@ -92,7 +92,8 @@ class VectorD {
 
 class AAAResult {
   public:
-    AAAResult() : z(0), f(0), w(0), errvec(0) {}
+    AAAResult() : converged(false), z(0), f(0), w(0), errvec(0) {}
+    bool converged;
     VectorC z;
     VectorC f;
     VectorC w;
@@ -167,6 +168,7 @@ std::unique_ptr<AAAResult> aaa (const VectorC& Z_, const VectorC& F_, double tol
 #ifdef IO
       std::cout<<"Converged after "<<(iter + 1)<<" iterations"<<std::endl;
 #endif
+      result->converged = true;
       break;
     }
   }
@@ -174,20 +176,19 @@ std::unique_ptr<AAAResult> aaa (const VectorC& Z_, const VectorC& F_, double tol
   return result;
 }
 
-/*
-complex<double> feval (const complex<double> zz, std::unique_ptr<AAAResult>& result) {
+VectorXcd feval (const VectorXcd& zv, const AAAResult& result) {
   const VectorXcd& z = result.z.data;
   const VectorXcd& f = result.f.data;
   const VectorXcd& w = result.w.data;
 
-  VectorXcd zv(1);
-  zv(0) = zz;
-  MatrixXcd CC = (zv.replicate(1, z.size()).array().colwise() - z.array()).inverse();
-  VectorXcd r = (CC * (w.array() * f.array()).matrix()).array() / (CC * w).array();
+  VectorXcd r (zv.size());
 
-  for (int i = 0; i < r.size(); ++i) {
+  MatrixXcd CC = (zv.replicate(1, zv.size()).array().rowwise() - z.transpose().array()).inverse();
+  r = (CC * (w.array() * f.array()).matrix()).array() / (CC * w).array();
+
+  for (Eigen::Index i = 0; i < r.size(); ++i) {
     if (std::isnan(r(i).real()) || std::isnan(r(i).imag())) {
-      for (int j = 0; j < z.size(); ++j) {
+      for (Eigen::Index j = 0; j < z.size(); ++j) {
         if (zv(i) == z(j)) {
           r(i) = f(j);
           break;
@@ -196,17 +197,26 @@ complex<double> feval (const complex<double> zz, std::unique_ptr<AAAResult>& res
     }
   }
 
-  return r(0);
-  //zv = zz(:);                               % vectorize zz if necessary
-  //CC = 1./bsxfun(@minus,zv,z.');            % Cauchy matrix
-  //r = (CC*(w.*f))./(CC*w);                  % AAA approx as vector
-  //ii = find(isnan(r));                      % find values NaN = Inf/Inf if any
-  //for j = 1:length(ii)
-    //r(ii(j)) = f(find(zv(ii(j))==z));       % force interpolation there
-  //end
-  //r = reshape(r,size(zz));    
+  return r;
 }
-*/
+
+// Flatten a matrix for vectorized element-wise evaluation
+MatrixXcd feval (const MatrixXcd& zz, const AAAResult& result) {
+  VectorXcd zv = Map<const VectorXcd>(zz.data(), zz.size());
+  VectorXcd r (feval(zv, result));
+  return Map<MatrixXcd>(r.data(), zz.rows(), zz.cols());
+}
+
+std::unique_ptr<VectorC> eval (const VectorC& zv, const AAAResult& result) {
+  std::unique_ptr<VectorC> r = std::make_unique<VectorC>(zv.data.size());
+  r->data = feval(zv.data, result);
+  return r;
+}
+  
+
+
+
+
 
 
 /*class MatrixC {
@@ -242,7 +252,7 @@ EMSCRIPTEN_BINDINGS(aaa_wrapper) {
     .function("set", &MatrixC::set)
     .function("view", &MatrixC::view)
     ;*/
-  class_<VectorC>("VectorC")
+  class_<VectorC>("VectorComplex")
     .constructor<int>()
     .function("get", &VectorC::get)
     .function("set", &VectorC::set)
@@ -252,7 +262,7 @@ EMSCRIPTEN_BINDINGS(aaa_wrapper) {
     .function("toString", &VectorC::toString)
 #endif
     ;
-  class_<VectorD>("VectorD")
+  class_<VectorD>("VectorDouble")
     .constructor<int>()
     .function("get", &VectorD::get)
     .function("set", &VectorD::set)
@@ -263,6 +273,7 @@ EMSCRIPTEN_BINDINGS(aaa_wrapper) {
 #endif
     ;
   class_<AAAResult>("AAAResult")
+    .property("converged", &AAAResult::converged)
     .property("z", &AAAResult::z)
     .property("f", &AAAResult::f)
     .property("w", &AAAResult::w)
@@ -280,6 +291,6 @@ EMSCRIPTEN_BINDINGS(aaa_wrapper) {
     ;
   
   function("_aaa", &aaa);
-  //function("feval", &feval);
+  function("_eval", &eval);
 }
 

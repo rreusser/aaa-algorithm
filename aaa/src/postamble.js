@@ -1,17 +1,24 @@
 {
   const _ready = new Promise((resolve, reject) => {
     Module["onRuntimeInitialized"] = function () {
-      const VectorC = Module["VectorC"];
-      const VectorD = Module["VectorD"];
+      const VectorComplex = Module["VectorComplex"];
+      const VectorDouble = Module["VectorDouble"];
 
-      VectorC["fromArray"] = function (array) {
-        const v = new VectorC(array.length / 2);
+      function flatten(array) {
+        if (Array.isArray(array)) return array.flat();
+        return array;
+      }
+
+      VectorComplex["fromArray"] = function (array) {
+        array = flatten(array);
+        const v = new VectorComplex(array.length / 2);
         v.view.set(array);
         return v;
       };
 
-      VectorD["fromArray"] = function (array) {
-        const v = new VectorD(array.length);
+      VectorDouble["fromArray"] = function (array) {
+        array = flatten(array);
+        const v = new VectorDouble(array.length);
         v.view.set(array);
         return v;
       };
@@ -22,19 +29,30 @@
         }
         const cleanup = [];
 
-        if (!(z instanceof VectorC)) {
-          z = VectorC.fromArray(z);
+        if (!(z instanceof VectorComplex)) {
+          z = VectorComplex.fromArray(z);
           cleanup.push(z);
         }
-        if (!(f instanceof VectorC)) {
-          f = VectorC.fromArray(f);
+        if (!(f instanceof VectorComplex)) {
+          f = VectorComplex.fromArray(f);
           cleanup.push(f);
         }
 
-        const result = Module["_aaa"].call(Module, z, f, tol, maxIter);
+        const approx = Module["_aaa"].call(Module, z, f, tol, maxIter);
 
         while (cleanup.length) cleanup.pop().delete();
 
+        return approx;
+      };
+
+      Module["eval"] = function (z, approx) {
+        const cleanup = [];
+        if (!(z instanceof VectorComplex)) {
+          z = VectorComplex["fromArray"](z);
+          cleanup.push(z);
+        }
+        const result = Module["_eval"].call(Module, z, approx);
+        while (cleanup.length) cleanup.pop().delete();
         return result;
       };
 
