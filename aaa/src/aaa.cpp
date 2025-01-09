@@ -2,7 +2,7 @@
 #define EIGEN_NO_DEBUG
 #define EIGEN_NO_AUTOMATIC_RESIZING
 
-#define IO
+//#define IO
 
 #include <emscripten/bind.h>
 #include <Eigen/Dense>
@@ -174,10 +174,11 @@ std::unique_ptr<AAAResult> aaa (const VectorC& Z_, const VectorC& F_, double tol
   return result;
 }
 
-complex<double> feval (const complex<double> zz, const VectorC& z_, const VectorC& f_, const VectorC& w_) {
-  const VectorXcd& z = z_.data;
-  const VectorXcd& f = f_.data;
-  const VectorXcd& w = w_.data;
+/*
+complex<double> feval (const complex<double> zz, std::unique_ptr<AAAResult>& result) {
+  const VectorXcd& z = result.z.data;
+  const VectorXcd& f = result.f.data;
+  const VectorXcd& w = result.w.data;
 
   VectorXcd zv(1);
   zv(0) = zz;
@@ -205,6 +206,7 @@ complex<double> feval (const complex<double> zz, const VectorC& z_, const Vector
   //end
   //r = reshape(r,size(zz));    
 }
+*/
 
 
 /*class MatrixC {
@@ -278,6 +280,6 @@ EMSCRIPTEN_BINDINGS(aaa_wrapper) {
     ;
   
   function("_aaa", &aaa);
-  function("feval", &feval);
+  //function("feval", &feval);
 }
 
