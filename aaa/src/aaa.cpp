@@ -2,7 +2,7 @@
 #define EIGEN_NO_DEBUG
 #define EIGEN_NO_AUTOMATIC_RESIZING
 
-//#define IO
+#define IO
 
 #include <emscripten/bind.h>
 #include <Eigen/Dense>
@@ -112,7 +112,6 @@ std::unique_ptr<AAAResult> aaa (const VectorC& Z_, const VectorC& F_, double tol
   VectorXi J = VectorXi::LinSpaced(m, 0, m - 1);
   MatrixXcd C(m, 0);
   VectorXcd R = Eigen::VectorXcd::Constant(m, F.mean());
-  //R.setConstant(F.mean());
   const DiagonalWrapper<const VectorXcd> SF = F.asDiagonal();
 
   for (int iter = 0; iter < mmax; ++iter) {

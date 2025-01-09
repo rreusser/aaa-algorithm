@@ -8,6 +8,10 @@ Given function `f(z)`, this module takes as input values `f[i]` tabulated at poi
 
 It's a remarkably effective algorithm [\[2\]](#ref2) which both does its job very well and has also found application in a number of different problems.
 
+## Installation
+
+Not (yet?) published to npm
+
 ## TO DO
 
 - [x] compute rational approximation
