@@ -33,7 +33,7 @@
 
         const result = Module["_aaa"].call(Module, z, f, tol, maxIter);
 
-        for (const obj of cleanup) obj.delete();
+        while (cleanup.length) cleanup.pop().delete();
 
         return result;
       };
