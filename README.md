@@ -65,7 +65,7 @@ result.delete();
 
 ## License
 
-&copy; 2025 Ricky Reusser. MIT License.
+&copy; 2025 Ricky Reusser. MPL-2.0 or MIT License.
 
 This project uses the Eigen library, which is licensed under the Mozilla Public License 2.0 (MPL-2.0). While this project is licensed under the MIT License, the parts that rely on Eigen are governed by the MPL-2.0. No modifications to the Eigen library are made by this project.
 
