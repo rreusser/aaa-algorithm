@@ -57,6 +57,16 @@ f.delete();
 result.delete();
 ```
 
+## Development
+
+To build the WASM module via Emscripten, all you (hopefully) need is a working Docker installation.
+
+```
+cd aaa/src
+make build-docker
+make build
+```
+
 ## References
 
 <a name="ref1"></a>1. Nakatsukasa, Y., Sete, O., & Trefethen, L. N. (2018). The AAA algorithm for rational approximation. SIAM Journal on Scientific Computing, 40(3), A1494–A1522. https://doi.org/10.1137/16M1106122
