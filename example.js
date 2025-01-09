@@ -9,21 +9,24 @@ const z = new VectorC(N);
 const f = new VectorC(N);
 
 for (let i = 0; i < N; i++) {
-  const tr = -0.5 + i / (N - 1);
-  const ti = 15.0 * PI * (i / (N - 1));
-  const a = exp(tr) * cos(ti);
-  const b = exp(tr) * sin(ti);
+  // Z = exp(linspace(-.5, .5+15i*pi, 1000));
+  const [tr, ti] = [-0.5 + i / (N - 1), 15.0 * PI * (i / (N - 1))];
+  const [zr, zi] = [exp(tr) * cos(ti), exp(tr) * sin(ti)];
+  z.set(i, [zr, zi]);
 
-  z.set(i, [a, b]);
+  // F = tan(pi*z/2);
   f.set(i, [
-    sin(PI * a) / (cosh(PI * b) + cos(PI * a)),
-    sinh(PI * b) / (cosh(PI * b) + cos(PI * a)),
+    sin(PI * zr) / (cosh(PI * zi) + cos(PI * zr)),
+    sinh(PI * zi) / (cosh(PI * zi) + cos(PI * zr)),
   ]);
 }
 
 const result = aaa(z, f, 1e-13, 100);
 
-console.log(result.z.view);
+for (let i = 0; i < result.z.length; i++) {
+  const [zr, zi] = result.z.get(i);
+  console.log(`z[${i}] = ${zr} + ${zi}i`);
+}
 
 z.delete();
 f.delete();
