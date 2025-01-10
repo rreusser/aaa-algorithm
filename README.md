@@ -52,12 +52,10 @@ console.log(`tan(π/4) ~ ${fEval[0]} + ${fEval[1]}i`);
 approx.delete();
 ```
 
-Upon running, this prints the approximated values of `tan(π/2 z)`:
+Upon running, this prints the approximated value of `tan(π/4)`:
 
 ```
-f(-0.5 + 0i) = -0.999999999999995 + 1.888073305146161e-15i
-f(0 + 0i) = 8.654269559363806e-16 + 2.4482177643400466e-15i
-f(0.5 + 0i) = 1.0000000000000009 + 2.4281095898961374e-15i
+tan(π/4) ~ 1.0000000000000009 + 2.4281095898961374e-15i
 ```
 
 ## Development
