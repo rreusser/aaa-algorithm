@@ -4,7 +4,7 @@
 
 ## Introduction
 
-Given function `f(z)`, this module takes as input values `f[i]` tabulated at points `z[i]` and computes a rational approximation using the Adaptive Antoulas-Anderson (AAA) algorithm [\[1\]](#ref1). Along with this, the algorithm returns the poles, zeros, and residues of the approximation.
+For a function `f(z)`, this module takes as input values `f[i]` tabulated at points `z[i]` and computes a rational approximation using the Adaptive Antoulas-Anderson (AAA) algorithm [\[1\]](#ref1). Along with this, the algorithm returns the poles, zeros, and residues of the approximation.
 
 It's a remarkably effective algorithm which both does its job very well and has also found application in a number of different problems like Laplace PDE solvers [\[2\]](#ref2).
 
