@@ -190,12 +190,15 @@ VectorXcd feval (const VectorXcd& zv, const AAAResult& result) {
   const VectorXcd& z = result.z.data;
   const VectorXcd& f = result.f.data;
   const VectorXcd& w = result.w.data;
-
   VectorXcd r (zv.size());
 
+  // Cauchy matrix
   MatrixXcd CC = (zv.replicate(1, zv.size()).array().rowwise() - z.transpose().array()).inverse();
-  r = (CC * (w.array() * f.array()).matrix()).array() / (CC * w).array();
 
+  // AAA approx as vector
+  r = (CC * (w.array() * f.array()).matrix()).array() / (CC * w).array();
+  
+  // Force interpolation at NaN values
   for (Eigen::Index i = 0; i < r.size(); ++i) {
     if (std::isnan(r(i).real()) || std::isnan(r(i).imag())) {
       for (Eigen::Index j = 0; j < z.size(); ++j) {
@@ -206,7 +209,6 @@ VectorXcd feval (const VectorXcd& zv, const AAAResult& result) {
       }
     }
   }
-
   return r;
 }
 
@@ -216,15 +218,6 @@ MatrixXcd feval (const MatrixXcd& zz, const AAAResult& result) {
   VectorXcd r (feval(zv, result));
   return Map<MatrixXcd>(r.data(), zz.rows(), zz.cols());
 }
-
-std::unique_ptr<VectorC> eval (const VectorC& zv, const AAAResult& result) {
-  std::unique_ptr<VectorC> r = std::make_unique<VectorC>(zv.data.size());
-  r->data = feval(zv.data, result);
-  return r;
-}
-  
-
-
 
 
 
@@ -302,6 +295,9 @@ EMSCRIPTEN_BINDINGS(aaa_wrapper) {
     ;
   
   function("_aaa", &aaa);
-  function("_eval", &eval);
+  function("_eval", optional_override([](const VectorC& zv, const AAAResult& result) {
+    std::unique_ptr<VectorC> r = std::make_unique<VectorC>(zv.data.size());
+    r->data = feval(zv.data, result);
+    return r;
+  }));
 }
-

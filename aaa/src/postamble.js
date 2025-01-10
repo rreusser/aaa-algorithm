@@ -58,7 +58,9 @@
           this,
           zSingleton
         );
-        return result.get(0);
+        const value = result.get(0);
+        result.delete();
+        return value;
       };
 
       resolve();
