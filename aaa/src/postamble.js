@@ -3,6 +3,7 @@
     Module["onRuntimeInitialized"] = function () {
       const VectorComplex = Module["VectorComplex"];
       const VectorDouble = Module["VectorDouble"];
+      const cleanup = [];
 
       function flatten(array) {
         if (Array.isArray(array)) return array.flat();
@@ -27,33 +28,37 @@
         if (z.length !== f.length) {
           throw new Error("z and f must have the same length");
         }
-        const cleanup = [];
-
-        if (!(z instanceof VectorComplex)) {
-          z = VectorComplex.fromArray(z);
-          cleanup.push(z);
-        }
-        if (!(f instanceof VectorComplex)) {
-          f = VectorComplex.fromArray(f);
-          cleanup.push(f);
-        }
-
-        const approx = Module["_aaa"].call(Module, z, f, tol, maxIter);
-
-        while (cleanup.length) cleanup.pop().delete();
-
-        return approx;
-      };
-
-      Module["eval"] = function (z, approx) {
-        const cleanup = [];
         if (!(z instanceof VectorComplex)) {
           z = VectorComplex["fromArray"](z);
           cleanup.push(z);
         }
-        const result = Module["_eval"].call(Module, z, approx);
+        if (!(f instanceof VectorComplex)) {
+          f = VectorComplex["fromArray"](f);
+          cleanup.push(f);
+        }
+        const approx = Module["_aaa"].call(Module, z, f, tol, maxIter);
+        while (cleanup.length) cleanup.pop().delete();
+        return approx;
+      };
+
+      Module["AAAResult"]["prototype"]["evalArray"] = function (z) {
+        if (!(z instanceof VectorComplex)) {
+          z = VectorComplex["fromArray"](z);
+          cleanup.push(z);
+        }
+        const result = Module["AAAResult"]["prototype"]["_eval"].call(this, z);
         while (cleanup.length) cleanup.pop().delete();
         return result;
+      };
+
+      const zSingleton = new VectorComplex(1);
+      Module["AAAResult"]["prototype"]["eval"] = function ([zr, zi]) {
+        zSingleton.set(0, [zr, zi]);
+        const result = Module["AAAResult"]["prototype"]["_eval"].call(
+          this,
+          zSingleton
+        );
+        return result.get(0);
       };
 
       resolve();

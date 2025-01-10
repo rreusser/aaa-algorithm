@@ -90,6 +90,10 @@ class VectorD {
     Eigen::VectorXd data;
 };
 
+// Forward declaration so that eval can be used in AAAResult
+class AAAResult;
+VectorXcd feval (const VectorXcd& zv, const AAAResult& result);
+
 class AAAResult {
   public:
     AAAResult() : converged(false), z(0), f(0), w(0), errvec(0) {}
@@ -98,6 +102,12 @@ class AAAResult {
     VectorC f;
     VectorC w;
     VectorD errvec;
+
+    std::unique_ptr<VectorC> eval (const VectorC& zv) const {
+      std::unique_ptr<VectorC> r = std::make_unique<VectorC>(zv.data.size());
+      r->data = feval(zv.data, *this);
+      return r;
+    }
 };
 
 std::unique_ptr<AAAResult> aaa (const VectorC& Z_, const VectorC& F_, double tol, uint32_t mmax) {
@@ -278,6 +288,7 @@ EMSCRIPTEN_BINDINGS(aaa_wrapper) {
     .property("f", &AAAResult::f)
     .property("w", &AAAResult::w)
     .property("errvec", &AAAResult::errvec)
+    .function("_eval", &AAAResult::eval)
     ;
   value_array<complex<double>>("complex")
     .element(
