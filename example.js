@@ -21,8 +21,8 @@ const f = z.map(([zr, zi]) => [
 const approx = aaa(z, f, 1e-13, 100);
 
 // Evaluate the result
-const fEval = approx.eval([0.5, 0]);
-console.log(`tan(π/4) ~ ${fEval[0]} + ${fEval[1]}i`);
+const [fr, fi] = approx.eval([0.5, 0]);
+console.log(`tan(π/4) ~ ${fr} + ${fi}i`);
 
 // Clean up
 approx.delete();
